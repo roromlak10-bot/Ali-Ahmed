@@ -184,4 +184,22 @@ section{padding:80px 5%}
 .navbar.active{max-height:500px;padding:20px 0}
 .navbar a{display:block;margin:0;padding:13px 0;text-align:center;border-radius:0}
 .navbar a::after{display:none}
-.home{flex-direction:column-reverse;text-align:center;padding
+.home{flex-direction:column-reverse;text-align:center;padding:130px 5% 70px;gap:35px}
+.home::before,.home::after{display:none}
+.home-content h1{font-size:38px}
+.home-content h3{font-size:18px}
+.social-icons,.home-buttons{justify-content:center}
+.stats{justify-content:center;gap:30px}
+.img-wrapper{width:260px;height:260px}
+.heading{font-size:32px}
+.about-info{grid-template-columns:1fr}
+.input-box input{width:100%}
+.back-to-top{bottom:20px;right:20px;width:45px;height:45px}
+}
+@media(max-width:480px){
+.home-content h1{font-size:32px}
+.heading{font-size:28px}
+.img-wrapper{width:220px;height:220px}
+.btn{padding:11px 24px;font-size:14px}
+.services-container,.projects-container,.skills-container{grid-template-columns:1fr}
+}
