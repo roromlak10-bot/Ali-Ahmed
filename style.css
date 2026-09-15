@@ -1,0 +1,419 @@
+/* ===== Reset & Base ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    list-style: none;
+    scroll-behavior: smooth;
+}
+
+:root {
+    --bg-color: #0f0f1a;
+    --second-bg: #1a1a2e;
+    --text-color: #ededed;
+    --main-color: #00abf0;
+    --accent: #7b2ff7;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ===== Header ===== */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 8%;
+    background: rgba(15, 15, 26, 0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo {
+    font-size: 26px;
+    color: var(--text-color);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.logo span {
+    color: var(--main-color);
+}
+
+.navbar a {
+    font-size: 17px;
+    color: var(--text-color);
+    margin-left: 35px;
+    transition: 0.3s;
+    position: relative;
+}
+
+.navbar a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 0;
+    height: 2px;
+    background: var(--main-color);
+    transition: 0.3s;
+}
+
+.navbar a:hover::after,
+.navbar a.active::after {
+    width: 100%;
+}
+
+.navbar a:hover,
+.navbar a.active {
+    color: var(--main-color);
+}
+
+.menu-icon {
+    font-size: 24px;
+    color: var(--text-color);
+    cursor: pointer;
+    display: none;
+}
+
+/* ===== Home Section ===== */
+.home {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 100px 8% 60px;
+    gap: 40px;
+}
+
+.home-content {
+    max-width: 600px;
+}
+
+.home-content h3 {
+    font-size: 22px;
+    font-weight: 400;
+    color: #b8b8b8;
+}
+
+.home-content h1 {
+    font-size: 56px;
+    font-weight: 700;
+    margin: 10px 0;
+    background: linear-gradient(90deg, var(--main-color), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.home-content h3 span.typing {
+    color: var(--main-color);
+    font-weight: 600;
+}
+
+.home-content p {
+    font-size: 16px;
+    margin: 20px 0 30px;
+    color: #c7c7c7;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.social-icons a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 42px;
+    height: 42px;
+    border: 2px solid var(--main-color);
+    border-radius: 50%;
+    color: var(--main-color);
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+.social-icons a:hover {
+    background: var(--main-color);
+    color: var(--bg-color);
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px var(--main-color);
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 32px;
+    background: linear-gradient(90deg, var(--main-color), var(--accent));
+    color: #fff;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(0, 171, 240, 0.4);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 30px rgba(0, 171, 240, 0.7);
+}
+
+.home-img img {
+    width: 380px;
+    max-width: 100%;
+    filter: drop-shadow(0 0 25px rgba(0, 171, 240, 0.5));
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+/* ===== Sections Common ===== */
+section {
+    padding: 100px 8%;
+}
+
+.heading {
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 60px;
+    font-weight: 700;
+}
+
+.heading span {
+    color: var(--main-color);
+}
+
+/* ===== About ===== */
+.about {
+    background: var(--second-bg);
+}
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.about-content h3 {
+    font-size: 26px;
+    margin-bottom: 20px;
+    color: var(--main-color);
+}
+
+.about-content p {
+    font-size: 17px;
+    color: #c7c7c7;
+    margin-bottom: 30px;
+}
+
+/* ===== Skills ===== */
+.skills-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+.skill-box {
+    background: var(--second-bg);
+    padding: 35px 25px;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: 0.3s;
+}
+
+.skill-box:hover {
+    transform: translateY(-10px);
+    border-color: var(--main-color);
+    box-shadow: 0 10px 30px rgba(0, 171, 240, 0.2);
+}
+
+.skill-box i {
+    font-size: 50px;
+    color: var(--main-color);
+    margin-bottom: 15px;
+}
+
+.skill-box h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.skill-box p {
+    font-size: 14px;
+    color: #b8b8b8;
+}
+
+/* ===== Projects ===== */
+.projects {
+    background: var(--second-bg);
+}
+
+.projects-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.project-box {
+    background: var(--bg-color);
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: 0.3s;
+}
+
+.project-box:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 30px rgba(123, 47, 247, 0.2);
+}
+
+.project-box h3 {
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: var(--main-color);
+}
+
+.project-box p {
+    font-size: 15px;
+    color: #c7c7c7;
+    margin-bottom: 20px;
+}
+
+.btn-small {
+    display: inline-block;
+    padding: 8px 20px;
+    background: transparent;
+    border: 2px solid var(--main-color);
+    color: var(--main-color);
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-small:hover {
+    background: var(--main-color);
+    color: var(--bg-color);
+}
+
+/* ===== Contact ===== */
+.contact form {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.input-box {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.input-box input,
+.contact textarea {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 15px;
+    color: var(--text-color);
+    background: var(--second-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-box input {
+    width: 48%;
+}
+
+.input-box input:focus,
+.contact textarea:focus {
+    border-color: var(--main-color);
+    box-shadow: 0 0 10px rgba(0, 171, 240, 0.3);
+}
+
+.contact textarea {
+    resize: none;
+    margin-bottom: 20px;
+}
+
+/* ===== Footer ===== */
+.footer {
+    text-align: center;
+    padding: 25px;
+    background: var(--second-bg);
+    font-size: 14px;
+    color: #b8b8b8;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 991px) {
+    .home-content h1 { font-size: 42px; }
+    .home-img img { width: 300px; }
+}
+
+@media (max-width: 768px) {
+    .menu-icon { display: block; }
+
+    .navbar {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--second-bg);
+        flex-direction: column;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: 0.4s ease;
+        display: flex;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .navbar.active {
+        max-height: 400px;
+        padding: 20px 0;
+    }
+
+    .navbar a {
+        display: block;
+        margin: 12px 0;
+        text-align: center;
+    }
+
+    .home {
+        flex-direction: column-reverse;
+        text-align: center;
+        padding-top: 130px;
+    }
+
+    .home-content h1 { font-size: 36px; }
+    .home-content h3 { font-size: 18px; }
+    .social-icons { justify-content: center; }
+
+    .heading { font-size: 32px; }
+
+    .input-box input { width: 100%; }
+}
