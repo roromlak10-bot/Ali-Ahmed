@@ -1,1223 +1,1045 @@
 /* ==========================================================
-   Ali Ahmed | Portfolio Script v2.0 (Advanced)
-   Features: Modular, Performance-Optimized, Error-Safe
+   Ali Ahmed | Portfolio Stylesheet
    ========================================================== */
 
-'use strict';
+/* ========== RESET & BASE ========== */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-/* ==========================================================
-   CORE UTILITIES
-   ========================================================== */
-const App = {
-    // Safe element selector
-    $: (selector, parent = document) => parent.querySelector(selector),
-    $$: (selector, parent = document) => [...parent.querySelectorAll(selector)],
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+}
 
-    // Safe event binding
-    on: (el, event, handler) => {
-        if (el && typeof el.addEventListener === 'function') {
-            el.addEventListener(event, handler);
-        }
-    },
+:root {
+    --bg-color: #0a0a14;
+    --second-bg: #12121f;
+    --text-color: #ededed;
+    --muted: #a0a0b8;
+    --main-color: #00abf0;
+    --accent: #7b2ff7;
+    --success: #00c853;
+    --border: rgba(255, 255, 255, 0.08);
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --glow: 0 0 25px rgba(0, 171, 240, 0.4);
+    --gradient: linear-gradient(135deg, #00abf0 0%, #7b2ff7 100%);
+    --radius: 16px;
+    --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-    // Debounce (performance)
-    debounce: (fn, delay = 100) => {
-        let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn(...args), delay);
-        };
-    },
+body.light-mode {
+    --bg-color: #f4f6fb;
+    --second-bg: #ffffff;
+    --text-color: #0a0a14;
+    --muted: #555570;
+    --border: rgba(0, 0, 0, 0.08);
+    --card-bg: rgba(0, 0, 0, 0.02);
+}
 
-    // Throttle (scroll performance)
-    throttle: (fn, limit = 100) => {
-        let waiting = false;
-        return (...args) => {
-            if (!waiting) {
-                fn(...args);
-                waiting = true;
-                setTimeout(() => waiting = false, limit);
-            }
-        };
-    },
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.7;
+    overflow-x: hidden;
+    transition: background var(--transition), color var(--transition);
+    -webkit-font-smoothing: antialiased;
+}
 
-    // Local storage helpers
-    storage: {
-        get: (key, fallback = null) => {
-            try { return localStorage.getItem(key) ?? fallback; }
-            catch { return fallback; }
-        },
-        set: (key, value) => {
-            try { localStorage.setItem(key, value); }
-            catch { /* silent */ }
-        }
-    },
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+img { max-width: 100%; display: block; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea { font-family: inherit; }
 
-    // Prefers reduced motion
-    reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+::selection { background: var(--main-color); color: #fff; }
 
-    // Is mobile
-    isMobile: () => window.innerWidth <= 768
-};
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--second-bg); }
+::-webkit-scrollbar-thumb { background: var(--gradient); border-radius: 10px; }
 
-/* ==========================================================
-   1. LOADER
-   ========================================================== */
-const Loader = {
-    init() {
-        const loader = App.$('#loader');
-        if (!loader) return;
+/* ========== LOADER ========== */
+.loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    z-index: 9999;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
 
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                loader.classList.add('hide');
-                document.body.classList.add('loaded');
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    Loader.runAnimations();
-                }, 600);
-            }, 800);
-        });
-    },
+.loader.hide { opacity: 0; visibility: hidden; }
 
-    runAnimations() {
-        // Delayed hero animations
-        const hero = App.$('.home-content');
-        if (hero) hero.classList.add('animate-in');
+.loader-circle {
+    width: 65px;
+    height: 65px;
+    border: 4px solid rgba(0, 171, 240, 0.2);
+    border-top-color: var(--main-color);
+    border-right-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loader h2 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.loader h2 span { -webkit-text-fill-color: var(--main-color); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ========== PROGRESS BAR ========== */
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--gradient);
+    z-index: 1000;
+    transition: width 0.15s ease-out;
+    box-shadow: 0 0 12px var(--main-color);
+}
+
+/* ========== HEADER ========== */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 8%;
+    background: rgba(10, 10, 20, 0.75);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+body.light-mode .header { background: rgba(244, 246, 251, 0.75); }
+
+.header.scrolled {
+    padding: 14px 8%;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-color);
+    letter-spacing: 1px;
+    transition: var(--transition);
+}
+
+.logo span { color: var(--main-color); }
+
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.navbar a {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+    padding: 8px 14px;
+    position: relative;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.navbar a::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 0;
+    height: 2px;
+    background: var(--main-color);
+    transition: var(--transition);
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+.navbar a:hover::after,
+.navbar a.active::after { width: 60%; }
+
+.navbar a:hover,
+.navbar a.active { color: var(--main-color); }
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.theme-toggle {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--main-color);
+    border-radius: 50%;
+    color: var(--main-color);
+    cursor: pointer;
+    transition: all 0.4s ease;
+    font-size: 16px;
+}
+
+.theme-toggle:hover {
+    background: var(--main-color);
+    color: #fff;
+    transform: rotate(360deg) scale(1.1);
+    box-shadow: var(--glow);
+}
+
+.menu-icon {
+    font-size: 24px;
+    color: var(--text-color);
+    cursor: pointer;
+    display: none;
+    transition: var(--transition);
+}
+
+.menu-icon:hover { color: var(--main-color); }
+
+/* ========== BUTTONS ========== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 30px;
+    background: var(--gradient);
+    color: #fff;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 5px 20px rgba(0, 171, 240, 0.35);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 35px rgba(0, 171, 240, 0.55);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--main-color);
+    color: var(--main-color);
+    box-shadow: none;
+}
+
+.btn-outline:hover {
+    background: var(--main-color);
+    color: #fff;
+    box-shadow: var(--glow);
+}
+
+/* ========== SECTION COMMON ========== */
+section {
+    padding: 110px 8%;
+    position: relative;
+}
+
+.heading {
+    text-align: center;
+    font-size: 46px;
+    font-weight: 700;
+    margin-bottom: 70px;
+    letter-spacing: -0.5px;
+    position: relative;
+    display: block;
+}
+
+.heading span {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.heading::after {
+    content: '';
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 4px;
+    background: var(--gradient);
+    border-radius: 4px;
+}
+
+/* ========== HERO ========== */
+.home {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+    padding: 120px 8% 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.home::before,
+.home::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.home::before {
+    top: 20%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0, 171, 240, 0.15), transparent 70%);
+}
+
+.home::after {
+    bottom: -10%;
+    left: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(123, 47, 247, 0.15), transparent 70%);
+}
+
+.home-content {
+    max-width: 620px;
+    position: relative;
+    z-index: 1;
+}
+
+.greeting {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--main-color);
+    padding: 6px 18px;
+    background: rgba(0, 171, 240, 0.1);
+    border: 1px solid rgba(0, 171, 240, 0.3);
+    border-radius: 50px;
+    margin-bottom: 20px;
+}
+
+.home-content h1 {
+    font-size: 62px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 10px 0;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1.5px;
+}
+
+.home-content h3 {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+
+.typing {
+    color: var(--main-color);
+    font-weight: 700;
+}
+
+.typing::after {
+    content: '|';
+    color: var(--main-color);
+    animation: blink 0.8s infinite;
+    margin-left: 3px;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.home-content p {
+    font-size: 16px;
+    color: var(--muted);
+    margin: 25px 0 30px;
+}
+
+.social-icons {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+.social-icons a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--main-color);
+    border-radius: 50%;
+    color: var(--main-color);
+    font-size: 17px;
+    transition: var(--transition);
+}
+
+.social-icons a:hover {
+    background: var(--main-color);
+    color: #fff;
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 171, 240, 0.5);
+}
+
+.home-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.stats {
+    display: flex;
+    gap: 45px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.stat h3 {
+    font-size: 32px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 3px;
+}
+
+.stat p {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.home-img {
+    position: relative;
+    z-index: 1;
+}
+
+.img-wrapper {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: var(--gradient);
+    padding: 6px;
+    animation: float 5s ease-in-out infinite;
+    box-shadow: 0 25px 60px rgba(0, 171, 240, 0.4);
+}
+
+.img-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -15px;
+    border-radius: 50%;
+    border: 2px dashed rgba(123, 47, 247, 0.5);
+    animation: rotate 20s linear infinite;
+}
+
+.img-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--second-bg);
+    padding: 30px;
+    object-fit: contain;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-22px); }
+}
+
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+/* ========== ABOUT ========== */
+.about { background: var(--second-bg); }
+
+.about-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.about-text h3 {
+    font-size: 30px;
+    margin-bottom: 22px;
+    color: var(--main-color);
+    font-weight: 700;
+}
+
+.about-text p {
+    font-size: 17px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.about-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin: 35px auto;
+    max-width: 700px;
+    text-align: left;
+}
+
+.about-info li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    transition: var(--transition);
+}
+
+.about-info li:hover {
+    border-color: var(--main-color);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 171, 240, 0.15);
+}
+
+.about-info li i {
+    color: var(--main-color);
+    font-size: 18px;
+    width: 22px;
+    text-align: center;
+}
+
+/* ========== SERVICES ========== */
+.services-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.service-box {
+    background: var(--card-bg);
+    padding: 38px 30px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.service-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--gradient);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.service-box:hover::before { transform: scaleX(1); }
+
+.service-box:hover {
+    transform: translateY(-12px);
+    border-color: rgba(0, 171, 240, 0.4);
+    box-shadow: 0 18px 40px rgba(0, 171, 240, 0.2);
+}
+
+.service-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--gradient);
+    border-radius: var(--radius);
+    font-size: 28px;
+    color: #fff;
+    margin-bottom: 22px;
+    transition: var(--transition);
+}
+
+.service-box:hover .service-icon {
+    transform: scale(1.1) rotate(-8deg);
+}
+
+.service-box h3 {
+    font-size: 21px;
+    margin-bottom: 14px;
+    font-weight: 700;
+}
+
+.service-box p {
+    font-size: 15px;
+    color: var(--muted);
+}
+
+/* ========== SKILLS ========== */
+.skills-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.skill-box {
+    background: var(--card-bg);
+    padding: 35px 28px;
+    border-radius: var(--radius);
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.skill-box:hover {
+    transform: translateY(-12px);
+    border-color: rgba(0, 171, 240, 0.4);
+    box-shadow: 0 18px 40px rgba(0, 171, 240, 0.2);
+}
+
+.skill-box i {
+    font-size: 52px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 18px;
+    display: inline-block;
+    transition: transform 0.4s ease;
+}
+
+.skill-box:hover i { transform: scale(1.15) rotate(-8deg); }
+
+.skill-box h3 {
+    font-size: 20px;
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+.skill-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+body.light-mode .skill-bar { background: rgba(0, 0, 0, 0.08); }
+
+.skill-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--gradient);
+    border-radius: 10px;
+    transition: width 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.percent {
+    font-size: 14px;
+    color: var(--main-color);
+    font-weight: 700;
+}
+
+/* ========== PROJECTS ========== */
+.projects { background: var(--second-bg); }
+
+.projects-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 28px;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.project-box {
+    background: var(--card-bg);
+    padding: 32px 28px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.project-box:hover {
+    transform: translateY(-12px);
+    border-color: var(--accent);
+    box-shadow: 0 18px 45px rgba(123, 47, 247, 0.25);
+}
+
+.project-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--gradient);
+    border-radius: 10px;
+    font-size: 24px;
+    color: #fff;
+    margin-bottom: 20px;
+    transition: var(--transition);
+}
+
+.project-box:hover .project-icon {
+    transform: scale(1.1) rotate(-8deg);
+}
+
+.project-box h3 {
+    font-size: 22px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.project-box p {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    flex-grow: 1;
+}
+
+.project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.project-tags span {
+    font-size: 12px;
+    padding: 4px 12px;
+    background: rgba(0, 171, 240, 0.12);
+    color: var(--main-color);
+    border-radius: 30px;
+    border: 1px solid rgba(0, 171, 240, 0.25);
+    font-weight: 500;
+}
+
+/* ========== CONTACT ========== */
+.contact-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+.contact-info h3 {
+    font-size: 26px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.contact-info > p {
+    color: var(--muted);
+    margin-bottom: 32px;
+    font-size: 16px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    transition: var(--transition);
+}
+
+.info-item:hover {
+    border-color: var(--main-color);
+    transform: translateX(6px);
+    box-shadow: 0 8px 25px rgba(0, 171, 240, 0.15);
+}
+
+.info-item i {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--gradient);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.info-item h4 {
+    font-size: 15px;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+.info-item p {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.contact-form {
+    background: var(--card-bg);
+    padding: 35px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+.input-box {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.input-box input,
+.contact-form textarea {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 15px;
+    color: var(--text-color);
+    background: var(--second-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    transition: var(--transition);
+}
+
+.input-box input { width: calc(50% - 8px); }
+
+.input-box input:focus,
+.contact-form textarea:focus {
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 4px rgba(0, 171, 240, 0.15);
+}
+
+.input-box input::placeholder,
+.contact-form textarea::placeholder {
+    color: var(--muted);
+    opacity: 0.7;
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 150px;
+    margin-bottom: 20px;
+}
+
+.contact-form .btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+}
+
+/* ========== FOOTER ========== */
+.footer {
+    background: var(--second-bg);
+    padding: 55px 8% 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 35px;
+    border-bottom: 1px solid var(--border);
+}
+
+.footer-brand p {
+    color: var(--muted);
+    margin: 15px 0 20px;
+    font-size: 14px;
+}
+
+.footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.footer-social a {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--main-color);
+    border-radius: 50%;
+    color: var(--main-color);
+    transition: var(--transition);
+    font-size: 16px;
+}
+
+.footer-social a:hover {
+    background: var(--main-color);
+    color: #fff;
+    transform: translateY(-5px);
+    box-shadow: var(--glow);
+}
+
+.footer-bottom {
+    padding: 25px 0;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.footer-bottom strong { color: var(--main-color); }
+
+/* ========== BACK TO TOP ========== */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: var(--gradient);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 18px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: var(--transition);
+    z-index: 999;
+    box-shadow: 0 10px 30px rgba(0, 171, 240, 0.5);
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    transform: translateY(-6px) scale(1.1);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 991px) {
+    .home-content h1 { font-size: 44px; }
+    .img-wrapper { width: 300px; height: 300px; }
+    .heading { font-size: 38px; margin-bottom: 55px; }
+    .contact-wrapper { grid-template-columns: 1fr; gap: 40px; }
+}
+
+@media (max-width: 768px) {
+    section { padding: 80px 5%; }
+    .header { padding: 18px 5%; }
+    .header.scrolled { padding: 12px 5%; }
+    .menu-icon { display: block; }
+
+    .navbar {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--second-bg);
+        flex-direction: column;
+        gap: 0;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.45s ease, padding 0.35s ease;
+        border-bottom: 1px solid var(--border);
     }
-};
 
-/* ==========================================================
-   2. MOBILE MENU
-   ========================================================== */
-const MobileMenu = {
-    init() {
-        const menuIcon = App.$('#menuIcon');
-        const navbar = App.$('#navbar');
-        if (!menuIcon || !navbar) return;
-
-        App.on(menuIcon, 'click', () => {
-            menuIcon.classList.toggle('fa-xmark');
-            menuIcon.classList.toggle('fa-bars');
-            navbar.classList.toggle('active');
-        });
-
-        App.$$('.nav-link').forEach(link => {
-            App.on(link, 'click', () => {
-                navbar.classList.remove('active');
-                menuIcon.classList.remove('fa-xmark');
-                menuIcon.classList.add('fa-bars');
-            });
-        });
-
-        // Close on outside click
-        App.on(document, 'click', (e) => {
-            if (navbar.classList.contains('active') &&
-                !navbar.contains(e.target) &&
-                !menuIcon.contains(e.target)) {
-                navbar.classList.remove('active');
-                menuIcon.classList.remove('fa-xmark');
-                menuIcon.classList.add('fa-bars');
-            }
-        });
+    .navbar.active {
+        max-height: 500px;
+        padding: 20px 0;
     }
-};
 
-/* ==========================================================
-   3. TYPING EFFECT (Advanced)
-   ========================================================== */
-const Typing = {
-    words: [
-        'Web Developer',
-        'Frontend Developer',
-        'JavaScript Lover',
-        'Problem Solver',
-        'UI Enthusiast',
-        'React Learner'
-    ],
-    wordIndex: 0,
-    charIndex: 0,
-    isDeleting: false,
-    element: null,
-
-    init() {
-        this.element = App.$('.typing');
-        if (!this.element) return;
-        if (App.reducedMotion) {
-            this.element.textContent = this.words[0];
-            return;
-        }
-        this.type();
-    },
-
-    type() {
-        const currentWord = this.words[this.wordIndex];
-        this.element.textContent = currentWord.substring(0, this.charIndex);
-
-        let delay = 100;
-        if (this.isDeleting) delay = 50;
-
-        if (!this.isDeleting && this.charIndex < currentWord.length) {
-            this.charIndex++;
-        } else if (this.isDeleting && this.charIndex > 0) {
-            this.charIndex--;
-        } else if (!this.isDeleting) {
-            this.isDeleting = true;
-            delay = 1500;
-        } else {
-            this.isDeleting = false;
-            this.wordIndex = (this.wordIndex + 1) % this.words.length;
-            delay = 300;
-        }
-
-        setTimeout(() => this.type(), delay);
+    .navbar a {
+        display: block;
+        margin: 0;
+        padding: 13px 0;
+        text-align: center;
+        border-radius: 0;
     }
-};
 
-/* ==========================================================
-   4. THEME MANAGER
-   ========================================================== */
-const Theme = {
-    init() {
-        const toggle = App.$('#themeToggle');
-        const icon = toggle ? App.$('i', toggle) : null;
-        if (!toggle || !icon) return;
+    .navbar a::after { display: none; }
 
-        const saved = App.storage.get('theme', 'dark');
-        if (saved === 'light') this.applyLight(icon);
-
-        App.on(toggle, 'click', () => {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-
-            if (isLight) {
-                this.applyLight(icon);
-                App.storage.set('theme', 'light');
-            } else {
-                this.applyDark(icon);
-                App.storage.set('theme', 'dark');
-            }
-
-            // Dispatch event for other modules
-            window.dispatchEvent(new CustomEvent('themechange', {
-                detail: { theme: isLight ? 'light' : 'dark' }
-            }));
-        });
-    },
-
-    applyLight(icon) {
-        icon.classList.remove('fa-moon');
-        icon.classList.add('fa-sun');
-    },
-
-    applyDark(icon) {
-        icon.classList.remove('fa-sun');
-        icon.classList.add('fa-moon');
+    .home {
+        flex-direction: column-reverse;
+        text-align: center;
+        padding: 130px 5% 70px;
+        gap: 35px;
     }
-};
 
-/* ==========================================================
-   5. SCROLL MANAGER
-   ========================================================== */
-const ScrollManager = {
-    init() {
-        this.progressBar = App.$('#progressBar');
-        this.backToTop = App.$('#backToTop');
-        this.header = App.$('#header');
-        this.sections = App.$$('section');
-        this.navLinks = App.$$('.nav-link');
-        this.indicatorDots = App.$$('.scroll-indicator .dot');
-        this.ringProgress = App.$('#ringProgress');
-
-        this.setupRing();
-
-        App.on(window, 'scroll', App.throttle(() => this.handle(), 16));
-        this.handle();
-    },
-
-    setupRing() {
-        if (!this.ringProgress) return;
-        const radius = 45;
-        const circumference = 2 * Math.PI * radius;
-        this.ringProgress.style.strokeDasharray = circumference;
-        this.ringProgress.style.strokeDashoffset = circumference;
-        this.ringCirc = circumference;
-    },
-
-    handle() {
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const percent = docHeight > 0 ? (scrollTop / docHeight) : 0;
-
-        // Progress bar
-        if (this.progressBar) this.progressBar.style.width = (percent * 100) + '%';
-
-        // Scroll ring
-        if (this.ringProgress && this.ringCirc) {
-            this.ringProgress.style.strokeDashoffset =
-                this.ringCirc - (percent * this.ringCirc);
-        }
-
-        // Header shadow
-        if (this.header) this.header.classList.toggle('scrolled', scrollTop > 50);
-
-        // Back to top
-        if (this.backToTop) this.backToTop.classList.toggle('show', scrollTop > 400);
-
-        // Active nav link
-        let current = '';
-        this.sections.forEach(section => {
-            if (scrollTop >= section.offsetTop - 150) {
-                current = section.getAttribute('id');
-            }
-        });
-
-        this.navLinks.forEach(link => {
-            link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
-        });
-
-        // Scroll indicator dots
-        this.indicatorDots.forEach(dot => {
-            dot.classList.toggle('active', dot.dataset.section === current);
-        });
-    }
-};
-
-/* ==========================================================
-   6. SMOOTH SCROLL
-   ========================================================== */
-const SmoothScroll = {
-    init() {
-        App.$$('a[href^="#"]').forEach(anchor => {
-            App.on(anchor, 'click', (e) => {
-                const id = anchor.getAttribute('href');
-                if (!id || id === '#') return;
-
-                const target = App.$(id);
-                if (!target) return;
-
-                e.preventDefault();
-                const offset = 80;
-                window.scrollTo({
-                    top: target.offsetTop - offset,
-                    behavior: App.reducedMotion ? 'auto' : 'smooth'
-                });
-            });
-        });
-    }
-};
-
-/* ==========================================================
-   7. REVEAL OBSERVER (Advanced)
-   ========================================================== */
-const Reveal = {
-    selectors: [
-        '.stat', '.info-item', '.about-info li',
-        '.service-box', '.project-box', '.skill-box',
-        '.timeline-item', '.edu-card', '.cert-card',
-        '.testimonial-box', '.blog-card', '.pricing-card',
-        '.counter-box', '.tech-item', '.contact-card',
-        '.milestone', '.partner', '.process-step',
-        '.award-card', '.team-member', '.stat-card',
-        '.radar-item', '.contact-info', '.cta-banner-content',
-        '.gallery-item', '.faq-item', '.availability-content'
-    ],
-
-    init() {
-        if (App.reducedMotion) return;
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('revealed');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-
-        App.$$(this.selectors.join(',')).forEach((el, i) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(25px)';
-            el.style.transition = `opacity 0.6s ease ${(i % 6) * 0.08}s, transform 0.6s ease ${(i % 6) * 0.08}s`;
-            observer.observe(el);
-        });
-    }
-};
-
-/* ==========================================================
-   8. SKILL BARS
-   ========================================================== */
-const SkillBars = {
-    init() {
-        const section = App.$('.skills');
-        if (!section) return;
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    App.$$('.skill-bar span', entry.target).forEach((bar, i) => {
-                        setTimeout(() => {
-                            bar.style.width = bar.dataset.width;
-                        }, i * 150);
-                    });
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.3 });
-
-        observer.observe(section);
-    }
-};
-
-/* ==========================================================
-   9. PROJECT FILTERS (Advanced)
-   ========================================================== */
-const ProjectFilters = {
-    init() {
-        const buttons = App.$$('.filter-btn');
-        const boxes = App.$$('.project-box');
-        if (!buttons.length) return;
-
-        buttons.forEach(btn => {
-            App.on(btn, 'click', () => {
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                const filter = btn.dataset.filter;
-                let visibleCount = 0;
-
-                boxes.forEach((box, i) => {
-                    const match = filter === 'all' || box.dataset.category === filter;
-
-                    if (match) {
-                        box.classList.remove('hide');
-                        box.style.animation = 'none';
-                        void box.offsetWidth;
-                        box.style.animation = `fadeUp 0.5s ease ${visibleCount * 0.05}s forwards`;
-                        visibleCount++;
-                    } else {
-                        box.classList.add('hide');
-                    }
-                });
-            });
-        });
-    }
-};
-
-/* ==========================================================
-   10. TOAST NOTIFICATIONS (Smart)
-   ========================================================== */
-const Toast = {
-    queue: [],
-    showing: false,
-
-    show(message, type = 'success', duration = 3000) {
-        this.queue.push({ message, type, duration });
-        if (!this.showing) this.process();
-    },
-
-    process() {
-        if (!this.queue.length) {
-            this.showing = false;
-            return;
-        }
-
-        this.showing = true;
-        const { message, type, duration } = this.queue.shift();
-        const toast = App.$('#toast');
-        const msgEl = App.$('#toastMessage');
-        if (!toast || !msgEl) {
-            this.showing = false;
-            return;
-        }
-
-        msgEl.textContent = message;
-
-        // Icon by type
-        const icon = App.$('i', toast);
-        if (icon) {
-            icon.className = type === 'error'
-                ? 'fa-solid fa-circle-exclamation'
-                : type === 'warning'
-                    ? 'fa-solid fa-triangle-exclamation'
-                    : 'fa-solid fa-circle-check';
-        }
-
-        toast.className = `toast toast-${type} show`;
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => this.process(), 400);
-        }, duration);
-    }
-};
-
-/* ==========================================================
-   11. CONTACT FORM (Advanced)
-   ========================================================== */
-const ContactForm = {
-    init() {
-        const form = App.$('#contactForm');
-        if (!form) return;
-
-        App.on(form, 'submit', async (e) => {
-            e.preventDefault();
-            const btn = form.querySelector('button[type="submit"]');
-            const originalHTML = btn.innerHTML;
-
-            // Validate
-            const data = new FormData(form);
-            const email = data.get('email') || form.querySelector('input[type="email"]').value;
-
-            if (!this.isValidEmail(email)) {
-                Toast.show('⚠️ Please enter a valid email', 'warning');
-                return;
-            }
-
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-            btn.disabled = true;
-
-            try {
-                // Simulate API call
-                await this.send(data);
-
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Sent!';
-                btn.style.background = 'linear-gradient(90deg, #00c853, #00abf0)';
-                Toast.show('✅ Message sent successfully!', 'success');
-                form.reset();
-            } catch (err) {
-                btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Failed';
-                Toast.show('❌ Something went wrong', 'error');
-            } finally {
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.style.background = '';
-                    btn.disabled = false;
-                }, 2500);
-            }
-        });
-    },
-
-    isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    },
-
-    send(data) {
-        // Simulate network delay
-        return new Promise(resolve => setTimeout(resolve, 1400));
-    }
-};
-
-/* ==========================================================
-   12. CUSTOM CURSOR (Advanced)
-   ========================================================== */
-const Cursor = {
-    init() {
-        if (App.isMobile() || App.reducedMotion) return;
-
-        this.cursor = App.$('#cursor');
-        this.follower = App.$('#cursorFollower');
-        if (!this.cursor || !this.follower) return;
-
-        this.mouseX = 0;
-        this.mouseY = 0;
-        this.followerX = 0;
-        this.followerY = 0;
-
-        App.on(document, 'mousemove', (e) => {
-            this.mouseX = e.clientX;
-            this.mouseY = e.clientY;
-            this.cursor.style.left = this.mouseX + 'px';
-            this.cursor.style.top = this.mouseY + 'px';
-        });
-
-        this.animate();
-
-        // Interactive elements
-        App.$$('a, button, .btn, .filter-btn, .social-icons a, .gallery-item, .project-box').forEach(el => {
-            App.on(el, 'mouseenter', () => this.grow());
-            App.on(el, 'mouseleave', () => this.shrink());
-        });
-
-        // Hide on leave window
-        App.on(document, 'mouseleave', () => {
-            this.cursor.style.opacity = '0';
-            this.follower.style.opacity = '0';
-        });
-        App.on(document, 'mouseenter', () => {
-            this.cursor.style.opacity = '1';
-            this.follower.style.opacity = '1';
-        });
-    },
-
-    animate() {
-        this.followerX += (this.mouseX - this.followerX) * 0.15;
-        this.followerY += (this.mouseY - this.followerY) * 0.15;
-        this.follower.style.left = this.followerX + 'px';
-        this.follower.style.top = this.followerY + 'px';
-        requestAnimationFrame(() => this.animate());
-    },
-
-    grow() {
-        this.follower.style.transform = 'translate(-50%, -50%) scale(1.6)';
-        this.follower.style.borderColor = '#7b2ff7';
-        this.follower.style.background = 'rgba(123, 47, 247, 0.1)';
-    },
-
-    shrink() {
-        this.follower.style.transform = 'translate(-50%, -50%) scale(1)';
-        this.follower.style.borderColor = '#00abf0';
-        this.follower.style.background = 'transparent';
-    }
-};
-
-/* ==========================================================
-   13. FAQ ACCORDION (Advanced)
-   ========================================================== */
-const FAQ = {
-    init() {
-        const items = App.$$('.faq-item');
-        if (!items.length) return;
-
-        items.forEach(item => {
-            const q = App.$('.faq-question', item);
-            App.on(q, 'click', () => {
-                const isOpen = item.classList.contains('active');
-
-                // Close all
-                items.forEach(other => {
-                    other.classList.remove('active');
-                    const otherAns = App.$('.faq-answer', other);
-                    if (otherAns) otherAns.style.maxHeight = null;
-                });
-
-                // Open clicked
-                if (!isOpen) {
-                    item.classList.add('active');
-                    const ans = App.$('.faq-answer', item);
-                    if (ans) ans.style.maxHeight = ans.scrollHeight + 'px';
-                }
-            });
-        });
-    }
-};
-
-/* ==========================================================
-   14. COUNTERS (Advanced)
-   ========================================================== */
-const Counters = {
-    animated: false,
-
-    init() {
-        const section = App.$('.counters');
-        if (!section) return;
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !this.animated) {
-                    this.animated = true;
-                    this.animateAll(entry.target);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.3 });
-
-        observer.observe(section);
-    },
-
-    animateAll(parent) {
-        App.$$('.counter', parent).forEach(counter => {
-            this.animateOne(counter);
-        });
-    },
-
-    animateOne(el) {
-        const target = +el.dataset.target;
-        const duration = 2000;
-        const start = performance.now();
-
-        const update = (now) => {
-            const progress = Math.min((now - start) / duration, 1);
-            // Ease out cubic
-            const eased = 1 - Math.pow(1 - progress, 3);
-            el.textContent = Math.floor(target * eased);
-
-            if (progress < 1) {
-                requestAnimationFrame(update);
-            } else {
-                el.textContent = target;
-            }
-        };
-
-        requestAnimationFrame(update);
-    }
-};
-
-/* ==========================================================
-   15. TESTIMONIAL SLIDER (Advanced)
-   ========================================================== */
-const Slider = {
-    current: 0,
-    total: 0,
-    autoPlayTimer: null,
-
-    init() {
-        this.track = App.$('#sliderTrack');
-        if (!this.track) return;
-
-        this.slides = App.$$('.slide', this.track);
-        this.total = this.slides.length;
-        this.dotsContainer = App.$('#sliderDots');
-
-        this.createDots();
-
-        App.on(App.$('#prevSlide'), 'click', () => this.prev());
-        App.on(App.$('#nextSlide'), 'click', () => this.next());
-
-        // Touch swipe
-        this.initSwipe();
-
-        // Auto play
-        this.autoPlay();
-
-        // Pause on hover
-        App.on(this.track, 'mouseenter', () => this.stopAutoPlay());
-        App.on(this.track, 'mouseleave', () => this.autoPlay());
-    },
-
-    createDots() {
-        if (!this.dotsContainer) return;
-        this.dotsContainer.innerHTML = '';
-
-        for (let i = 0; i < this.total; i++) {
-            const dot = document.createElement('span');
-            dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
-            App.on(dot, 'click', () => this.goTo(i));
-            this.dotsContainer.appendChild(dot);
-        }
-    },
-
-    goTo(index) {
-        this.current = (index + this.total) % this.total;
-        this.track.style.transform = `translateX(-${this.current * 100}%)`;
-
-        App.$$('.slider-dot', this.dotsContainer).forEach((dot, i) => {
-            dot.classList.toggle('active', i === this.current);
-        });
-    },
-
-    next() { this.goTo(this.current + 1); },
-    prev() { this.goTo(this.current - 1); },
-
-    autoPlay() {
-        this.stopAutoPlay();
-        this.autoPlayTimer = setInterval(() => this.next(), 5000);
-    },
-
-    stopAutoPlay() {
-        if (this.autoPlayTimer) clearInterval(this.autoPlayTimer);
-    },
-
-    initSwipe() {
-        let startX = 0, endX = 0;
-        App.on(this.track, 'touchstart', (e) => startX = e.touches[0].clientX);
-        App.on(this.track, 'touchend', (e) => {
-            endX = e.changedTouches[0].clientX;
-            if (startX - endX > 50) this.next();
-            else if (endX - startX > 50) this.prev();
-        });
-    }
-};
-
-/* ==========================================================
-   16. POPUP
-   ========================================================== */
-const Popup = {
-    init() {
-        const popup = App.$('#popup');
-        const closeBtn = App.$('#popupClose');
-        if (!popup) return;
-
-        if (sessionStorage.getItem('popupShown') !== 'true') {
-            setTimeout(() => {
-                popup.classList.add('show');
-                sessionStorage.setItem('popupShown', 'true');
-            }, 15000);
-        }
-
-        App.on(closeBtn, 'click', () => popup.classList.remove('show'));
-        App.on(popup, 'click', (e) => {
-            if (e.target === popup) popup.classList.remove('show');
-        });
-    }
-};
-
-/* ==========================================================
-   17. COOKIE BANNER
-   ========================================================== */
-const Cookies = {
-    init() {
-        const banner = App.$('#cookieBanner');
-        if (!banner) return;
-
-        if (!App.storage.get('cookiesChoice')) {
-            setTimeout(() => banner.classList.add('show'), 3000);
-        }
-
-        App.on(App.$('#acceptCookies'), 'click', () => {
-            App.storage.set('cookiesChoice', 'accepted');
-            banner.classList.remove('show');
-            Toast.show('🍪 Cookies accepted!', 'success');
-        });
-
-        App.on(App.$('#declineCookies'), 'click', () => {
-            App.storage.set('cookiesChoice', 'declined');
-            banner.classList.remove('show');
-        });
-    }
-};
-
-/* ==========================================================
-   18. CHAT WIDGET (Advanced)
-   ========================================================== */
-const Chat = {
-    init() {
-        this.widget = App.$('#chatWidget');
-        this.toggle = App.$('#chatToggle');
-        this.body = App.$('#chatBody');
-        this.input = App.$('#chatInput');
-        if (!this.widget || !this.toggle) return;
-
-        App.on(this.toggle, 'click', () => this.toggleChat());
-        App.on(App.$('#chatClose'), 'click', () => this.close());
-        App.on(App.$('#chatSend'), 'click', () => this.send());
-        App.on(this.input, 'keypress', (e) => {
-            if (e.key === 'Enter') this.send();
-        });
-    },
-
-    toggleChat() {
-        this.widget.classList.toggle('open');
-        this.toggle.classList.toggle('active');
-
-        if (this.widget.classList.contains('open')) {
-            setTimeout(() => this.input?.focus(), 400);
-        }
-    },
-
-    close() {
-        this.widget.classList.remove('open');
-        this.toggle.classList.remove('active');
-    },
-
-    send() {
-        const text = this.input.value.trim();
-        if (!text) return;
-
-        this.addMessage(text, 'user');
-        this.input.value = '';
-
-        // Smart auto-reply
-        setTimeout(() => {
-            const reply = this.getReply(text);
-            this.addMessage(reply, 'bot');
-        }, 1200);
-    },
-
-    addMessage(text, type) {
-        const msg = document.createElement('div');
-        msg.className = `chat-message ${type}`;
-        msg.innerHTML = `<p>${this.escape(text)}</p><span class="chat-time">Just now</span>`;
-        this.body.appendChild(msg);
-        this.body.scrollTop = this.body.scrollHeight;
-    },
-
-    getReply(text) {
-        const lower = text.toLowerCase();
-        if (lower.includes('price') || lower.includes('cost'))
-            return '💰 Pricing starts from $49. Check the pricing section for details!';
-        if (lower.includes('hire') || lower.includes('work'))
-            return '🎯 Great! Please fill the contact form and I\'ll get back within 24 hours.';
-        if (lower.includes('project') || lower.includes('portfolio'))
-            return '📁 Check my Projects section to see some of my recent work!';
-        if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey'))
-            return '👋 Hello! How can I help you today?';
-        return '👍 Thanks for your message! I\'ll get back to you soon.';
-    },
-
-    escape(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-};
-
-/* ==========================================================
-   19. LANGUAGE SWITCHER
-   ========================================================== */
-const Language = {
-    init() {
-        const buttons = App.$$('.lang-btn');
-        if (!buttons.length) return;
-
-        // Load saved
-        const saved = App.storage.get('language', 'en');
-        if (saved !== 'en') this.apply(saved, buttons);
-
-        buttons.forEach(btn => {
-            App.on(btn, 'click', () => this.apply(btn.dataset.lang, buttons));
-        });
-    },
-
-    apply(lang, buttons) {
-        buttons.forEach(b => b.classList.remove('active'));
-        const active = buttons.find(b => b.dataset.lang === lang);
-        if (active) active.classList.add('active');
-
-        document.documentElement.lang = lang;
-        document.body.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-
-        Toast.show(lang === 'ar' ? '🌍 تم تغيير اللغة' : '🌍 Language switched', 'success');
-        App.storage.set('language', lang);
-    }
-};
-
-/* ==========================================================
-   20. ANNOUNCEMENT BAR
-   ========================================================== */
-const Announcement = {
-    init() {
-        const bar = App.$('#announcementBar');
-        if (!bar) return;
-
-        if (App.storage.get('announcementClosed') === 'true') {
-            bar.style.display = 'none';
-            return;
-        }
-
-        App.on(App.$('#announcementClose'), 'click', () => {
-            bar.classList.add('hide');
-            App.storage.set('announcementClosed', 'true');
-            setTimeout(() => bar.style.display = 'none', 400);
-        });
-    }
-};
-
-/* ==========================================================
-   21. GALLERY LIGHTBOX
-   ========================================================== */
-const Lightbox = {
-    init() {
-        const box = App.$('#lightbox');
-        const img = App.$('#lightboxImage');
-        if (!box || !img) return;
-
-        App.$$('.gallery-item').forEach(item => {
-            App.on(item, 'click', () => {
-                const src = App.$('img', item)?.src;
-                if (src) {
-                    img.src = src;
-                    box.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                }
-            });
-        });
-
-        const close = () => {
-            box.classList.remove('show');
-            document.body.style.overflow = '';
-        };
-
-        App.on(App.$('#lightboxClose'), 'click', close);
-        App.on(box, 'click', (e) => {
-            if (e.target === box) close();
-        });
-    }
-};
-
-/* ==========================================================
-   22. PROJECT MODAL
-   ========================================================== */
-const Modal = {
-    init() {
-        const modal = App.$('#projectModal');
-        if (!modal) return;
-
-        App.$$('.project-box .btn-small').forEach(btn => {
-            App.on(btn, 'click', (e) => {
-                e.preventDefault();
-                const box = btn.closest('.project-box');
-                const title = App.$('h3', box)?.textContent || 'Project';
-                const desc = App.$('p', box)?.textContent || '';
-
-                App.$('#modalTitle').textContent = title;
-                App.$('#modalDescription').textContent = desc;
-
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            });
-        });
-
-        const close = () => {
-            modal.classList.remove('show');
-            document.body.style.overflow = '';
-        };
-
-        App.on(App.$('#modalClose'), 'click', close);
-        App.on(modal, 'click', (e) => {
-            if (e.target === modal) close();
-        });
-    }
-};
-
-/* ==========================================================
-   23. PAGE DOTS & SCROLL INDICATOR
-   ========================================================== */
-const Navigation = {
-    init() {
-        // Page dots
-        App.$$('.page-dot').forEach(dot => {
-            App.on(dot, 'click', (e) => {
-                e.preventDefault();
-                const target = App.$(dot.getAttribute('href'));
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Scroll indicator dots
-        App.$$('.scroll-indicator .dot').forEach(dot => {
-            App.on(dot, 'click', () => {
-                const target = App.$(`#${dot.dataset.section}`);
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Scroll ring click
-        App.on(App.$('#scrollRing'), 'click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-};
-
-/* ==========================================================
-   24. KEYBOARD SHORTCUTS
-   ========================================================== */
-const Keyboard = {
-    init() {
-        App.on(document, 'keydown', (e) => {
-            // ESC - close overlays
-            if (e.key === 'Escape') {
-                App.$$('.modal.show, .lightbox.show, .popup.show').forEach(el => {
-                    el.classList.remove('show');
-                });
-                document.body.style.overflow = '';
-                const chat = App.$('#chatWidget');
-                if (chat) chat.classList.remove('open');
-            }
-
-            // Ctrl+T - toggle theme
-            if (e.ctrlKey && e.key.toLowerCase() === 't') {
-                e.preventDefault();
-                App.$('#themeToggle')?.click();
-            }
-
-            // Home key - top
-            if (e.key === 'Home' && !e.target.matches('input, textarea')) {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            // End key - bottom
-            if (e.key === 'End' && !e.target.matches('input, textarea')) {
-                e.preventDefault();
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-            }
-        });
-    }
-};
-
-/* ==========================================================
-   25. FORMS (Newsletter + Popup)
-   ========================================================== */
-const Forms = {
-    init() {
-        // Newsletter
-        const newsletter = App.$('.newsletter-form');
-        if (newsletter) {
-            App.on(newsletter, 'submit', (e) => {
-                e.preventDefault();
-                const email = newsletter.querySelector('input[type="email"]').value;
-                if (!ContactForm.isValidEmail(email)) {
-                    Toast.show('⚠️ Invalid email', 'warning');
-                    return;
-                }
-                Toast.show('✅ Subscribed successfully!', 'success');
-                newsletter.reset();
-            });
-        }
-
-        // Popup
-        const popupForm = App.$('.popup-form');
-        if (popupForm) {
-            App.on(popupForm, 'submit', (e) => {
-                e.preventDefault();
-                const email = popupForm.querySelector('input[type="email"]').value;
-                if (!ContactForm.isValidEmail(email)) {
-                    Toast.show('⚠️ Invalid email', 'warning');
-                    return;
-                }
-                Toast.show('✅ Thanks for subscribing!', 'success');
-                popupForm.reset();
-                App.$('#popup')?.classList.remove('show');
-            });
-        }
-    }
-};
-
-/* ==========================================================
-   26. LAZY LOADING IMAGES
-   ========================================================== */
-const LazyLoad = {
-    init() {
-        if (!('IntersectionObserver' in window)) return;
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                    }
-                    img.classList.add('loaded');
-                    observer.unobserve(img);
-                }
-            });
-        }, { rootMargin: '100px' });
-
-        App.$$('img[loading="lazy"]').forEach(img => observer.observe(img));
-    }
-};
-
-/* ==========================================================
-   27. PARALLAX EFFECT (Subtle)
-   ========================================================== */
-const Parallax = {
-    init() {
-        if (App.isMobile() || App.reducedMotion) return;
-
-        const hero = App.$('.home-img');
-        if (!hero) return;
-
-        App.on(window, 'scroll', App.throttle(() => {
-            const scrolled = window.scrollY;
-            if (scrolled < window.innerHeight) {
-                hero.style.transform = `translateY(${scrolled * 0.3}px)`;
-            }
-        }, 16));
-    }
-};
-
-/* ==========================================================
-   28. PERFORMANCE MONITOR
-   ========================================================== */
-const Performance = {
-    init() {
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const nav = performance.getEntriesByType('navigation')[0];
-                if (!nav) return;
-
-                const loadTime = nav.loadEventEnd - nav.startTime;
-                const domTime = nav.domContentLoadedEventEnd - nav.startTime;
-
-                console.log(
-                    `%c⚡ Performance Report`,
-                    'color: #00abf0; font-size: 14px; font-weight: bold;'
-                );
-                console.log(`%c   DOM Ready: ${domTime.toFixed(0)}ms`, 'color: #7b2ff7;');
-                console.log(`%c   Full Load: ${loadTime.toFixed(0)}ms`, 'color: #00c853;');
-            }, 0);
-        });
-    }
-};
-
-/* ==========================================================
-   29. CONSOLE BRANDING
-   ========================================================== */
-const ConsoleArt = {
-    init() {
-        const style1 = 'color: #00abf0; font-size: 22px; font-weight: bold;';
-        const style2 = 'color: #7b2ff7; font-size: 13px;';
-        const style3 = 'color: #00c853; font-size: 12px;';
-
-        console.log('%c👋 Ali Ahmed | Portfolio v2.0', style1);
-        console.log('%c💻 Frontend Developer', style2);
-        console.log('%c📧 ali@example.com', style3);
-        console.log('%c🌐 https://roromlak10-bot.github.io/Ali-Ahmed/', style3);
-        console.log(
-            '%c💡 Tip: Press Ctrl+T to toggle theme, ESC to close modals',
-            'color: #ff9800; font-size: 12px; font-style: italic;'
-        );
-    }
-};
-
-/* ==========================================================
-   30. APP INITIALIZER
-   ========================================================== */
-const initApp = () => {
-    try {
-        Loader.init();
-        MobileMenu.init();
-        Typing.init();
-        Theme.init();
-        ScrollManager.init();
-        SmoothScroll.init();
-        Reveal.init();
-        SkillBars.init();
-        ProjectFilters.init();
-        ContactForm.init();
-        Cursor.init();
-        FAQ.init();
-        Counters.init();
-        Slider.init();
-        Popup.init();
-        Cookies.init();
-        Chat.init();
-        Language.init();
-        Announcement.init();
-        Lightbox.init();
-        Modal.init();
-        Navigation.init();
-        Keyboard.init();
-        Forms.init();
-        LazyLoad.init();
-        Parallax.init();
-        Performance.init();
-        ConsoleArt.init();
-
-        console.log('%c✅ All modules loaded successfully', 'color: #00c853; font-weight: bold;');
-    } catch (err) {
-        console.error('%c❌ Init error:', 'color: #ff0000;', err);
-    }
-};
-
-/* ========== RUN ========== */
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
-} else {
-    initApp();
+    .home::before, .home::after { display: none; }
+    .home-content h1 { font-size: 38px; }
+    .home-content h3 { font-size: 18px; }
+    .social-icons, .home-buttons { justify-content: center; }
+    .stats { justify-content: center; gap: 30px; }
+    .img-wrapper { width: 260px; height: 260px; }
+    .heading { font-size: 32px; }
+    .about-info { grid-template-columns: 1fr; }
+    .input-box input { width: 100%; }
+    .back-to-top { bottom: 20px; right: 20px; width: 45px; height: 45px; }
+}
+
+@media (max-width: 480px) {
+    .home-content h1 { font-size: 32px; }
+    .heading { font-size: 28px; }
+    .img-wrapper { width: 220px; height: 220px; }
+    .btn { padding: 11px 24px; font-size: 14px; }
+    .services-container,
+    .projects-container,
+    .skills-container { grid-template-columns: 1fr; }
 }
